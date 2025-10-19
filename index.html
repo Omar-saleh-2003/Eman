@@ -139,7 +139,7 @@
             transform: translateY(20px);
         }
         .message.show { opacity: 1; transform: translateY(0); }
-        .message.loading { font-style: italic; opacity: 0.5; }
+        .message.loading { font-style: italic; opacity: 0.7; }
 
         .heart-container { margin-top: 20px; cursor: pointer; }
 
@@ -277,11 +277,14 @@
 
     <div class="tap-counter ui-element" id="tapCounter">نمو الزهرة: 0/15</div>
     <div class="music-control ui-element" id="musicControl">🎵 تشغيل الموسيقى</div>
+    
+    <!-- IMPORTANT: Place your 'helm_hayaty.mp3' file in the same folder as this HTML file. -->
     <audio id="backgroundMusic" loop src="helm_hayaty.mp3"></audio>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             let potTapCount = 0, flowerStage = 0, isBloomed = false, musicPlaying = false, isGenerating = false;
+            let typewriterInterval;
             
             // --- Gemini API Configuration ---
             const API_KEY = ""; // Leave empty, it will be handled by the environment
@@ -305,6 +308,25 @@
                 flowerStages: Array.from({length: 6}, (_, i) => document.getElementById(`stage${i}`)),
             };
 
+            // --- Typewriter Effect ---
+            function typewriter(element, text) {
+                clearInterval(typewriterInterval);
+                const words = text.split(' ');
+                let i = 0;
+                element.textContent = '';
+                element.classList.remove('loading');
+                element.classList.add('show');
+
+                typewriterInterval = setInterval(() => {
+                    if (i < words.length) {
+                        element.textContent += words[i] + ' ';
+                        i++;
+                    } else {
+                        clearInterval(typewriterInterval);
+                    }
+                }, 120); // Typing speed
+            }
+
             // --- Gemini API Call Function ---
             async function generateGeminiContent(prompt, retries = 3, delay = 1000) {
                 isGenerating = true;
@@ -315,33 +337,22 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const result = await response.json();
                     const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
                     if (!text) throw new Error("No content generated.");
-                    
-                    isGenerating = false;
                     return text.trim();
-
                 } catch (error) {
                     if (retries > 0) {
                         await new Promise(res => setTimeout(res, delay));
                         return generateGeminiContent(prompt, retries - 1, delay * 2);
-                    } else {
-                        isGenerating = false;
-                        console.error("Gemini API Error:", error);
-                        return "يبدو أن الشاعر يحتاج للحظة من الإلهام... حاولي مجدداً.";
                     }
+                    console.error("Gemini API Error:", error);
+                    return "يبدو أن الشاعر يحتاج للحظة من الإلهام... حاولي مجدداً.";
+                } finally {
+                    isGenerating = false;
                 }
             }
-
-            const loadProgress = () => { /* ... existing code ... */ };
-            const saveProgress = () => { /* ... existing code ... */ };
-            const updateCounter = () => { /* ... existing code ... */ };
 
             const updateFlowerStage = (isSilent = false) => {
                 const newStage = Math.min(Math.floor(potTapCount / 3), 5);
@@ -360,28 +371,40 @@
 
             const showGeneratedMessage = async () => {
                 if (isGenerating) return;
+                clearInterval(typewriterInterval);
+                DOM.messageEl.classList.remove('show');
                 DOM.messageEl.classList.add('loading');
-                DOM.messageEl.textContent = 'يكتب لكِ رسالة...';
+                DOM.messageEl.textContent = 'الشاعر يجمع كلماته...';
                 
-                const prompt = "اكتب رسالة حب قصيرة جداً ورومانسية من سطر واحد فقط، باللغة العربية.";
+                const prompt = "اكتب رسالة حب قصيرة جداً ورومانسية من سطر واحد فقط، باللغة العربية بأسلوب شاعري.";
                 const message = await generateGeminiContent(prompt);
                 
-                DOM.messageEl.classList.remove('loading');
-                DOM.messageEl.classList.remove('show');
-                setTimeout(() => {
-                    DOM.messageEl.textContent = message;
-                    DOM.messageEl.classList.add('show');
-                }, 100);
+                typewriter(DOM.messageEl, message);
             };
-
-            const createFlyingHearts = () => { /* ... existing code ... */ };
-            const showBloomMessage = () => {
-                isBloomed = true;
-                DOM.bloomMessageEl.classList.add('show');
-                DOM.poemButton.classList.add('show');
-                if (musicPlaying) { /* ... existing code ... */ }
+            
+            const loadProgress = () => { const s=localStorage.getItem('heartbloom_pot_taps'); if(s){potTapCount=parseInt(s,10);flowerStage=Math.min(Math.floor(potTapCount/3),5);updateFlowerStage(true);updateCounter();} };
+            const saveProgress = () => localStorage.setItem('heartbloom_pot_taps', potTapCount.toString());
+            const updateCounter = () => DOM.tapCounterEl.textContent = `نمو الزهرة: ${potTapCount}/15`;
+            const createFlyingHearts = () => { const r=DOM.heartTouchArea.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2; for(let i=0;i<5;i++){const h=document.createElement('div');h.className='flying-heart';h.innerHTML=DOM.heartTouchArea.querySelector('svg').outerHTML;h.style.left=`${x-15}px`;h.style.top=`${y-15}px`;document.body.appendChild(h);const a=h.animate([{transform:`translate(0,0) scale(1) rotate(0deg)`,opacity:1},{transform:`translate(${(Math.random()-.5)*100}px,-${150+Math.random()*100}px) scale(0) rotate(${(Math.random()-.5)*360}deg)`,opacity:0}],{duration:1800,easing:'cubic-bezier(.1,.9,.2,1)',delay:i*50});a.onfinish=()=>h.remove();} };
+            const showBloomMessage = () => { isBloomed=true; DOM.bloomMessageEl.classList.add('show'); DOM.poemButton.classList.add('show'); if(musicPlaying){setTimeout(()=>{let v=DOM.backgroundMusic.volume;const f=setInterval(()=>{v=Math.max(0,v-.05);DOM.backgroundMusic.volume=v;if(v===0){DOM.backgroundMusic.pause();clearInterval(f);}},200);},8000);} };
+            
+            const toggleMusic = () => {
+                if (musicPlaying) {
+                    DOM.backgroundMusic.pause();
+                    DOM.musicControlEl.textContent = '🎵 تشغيل الموسيقى';
+                } else {
+                    const playPromise = DOM.backgroundMusic.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                           DOM.musicControlEl.textContent = '🎵 إيقاف الموسيقى';
+                        }).catch(error => {
+                            console.error("Music playback failed:", error);
+                            DOM.musicControlEl.textContent = '🎵 الموسيقى معطلة';
+                        });
+                    }
+                }
+                musicPlaying = !musicPlaying;
             };
-            const toggleMusic = () => { /* ... existing code ... */ };
 
             // --- Event Listeners & Init ---
             DOM.startButton.addEventListener('click', () => {
@@ -406,28 +429,19 @@
 
             DOM.poemButton.addEventListener('click', async () => {
                 if (isGenerating) return;
+                clearInterval(typewriterInterval);
                 DOM.poemModal.classList.add('show');
-                DOM.poemText.textContent = 'جاري كتابة قصيدة تليق بكِ...';
+                DOM.poemText.textContent = 'الشاعر ينسج قصيدة تليق بكِ...';
                 const prompt = "اكتب قصيدة حب قصيرة وجميلة لإيمان، الملقبة بمونه. اجعلها عن كيف أن حبها جعل الحياة تزدهر مثل الزهرة.";
                 const poem = await generateGeminiContent(prompt);
-                DOM.poemText.textContent = poem;
+                typewriter(DOM.poemText, poem);
             });
 
             DOM.closePoemModal.addEventListener('click', () => {
                 DOM.poemModal.classList.remove('show');
+                clearInterval(typewriterInterval);
             });
-
-            // --- Simplified Functions (to save space) ---
-            const simplifiedFunctions = () => {
-                loadProgress = () => { const s=localStorage.getItem('heartbloom_pot_taps'); if(s){potTapCount=parseInt(s,10);flowerStage=Math.min(Math.floor(potTapCount/3),5);updateFlowerStage(true);updateCounter();} };
-                saveProgress = () => localStorage.setItem('heartbloom_pot_taps', potTapCount.toString());
-                updateCounter = () => DOM.tapCounterEl.textContent = `نمو الزهرة: ${potTapCount}/15`;
-                createFlyingHearts = () => { const r=DOM.heartTouchArea.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2; for(let i=0;i<5;i++){const h=document.createElement('div');h.className='flying-heart';h.innerHTML=DOM.heartTouchArea.querySelector('svg').outerHTML;h.style.left=`${x-15}px`;h.style.top=`${y-15}px`;document.body.appendChild(h);const a=h.animate([{transform:`translate(0,0) scale(1) rotate(0deg)`,opacity:1},{transform:`translate(${(Math.random()-.5)*100}px,-${150+Math.random()*100}px) scale(0) rotate(${(Math.random()-.5)*360}deg)`,opacity:0}],{duration:1800,easing:'cubic-bezier(.1,.9,.2,1)',delay:i*50});a.onfinish=()=>h.remove();} };
-                showBloomMessage = () => { isBloomed=true; DOM.bloomMessageEl.classList.add('show'); DOM.poemButton.classList.add('show'); if(musicPlaying){setTimeout(()=>{let v=DOM.backgroundMusic.volume;const f=setInterval(()=>{v=Math.max(0,v-.05);DOM.backgroundMusic.volume=v;if(v===0){DOM.backgroundMusic.pause();clearInterval(f);}},200);},8000);} };
-                toggleMusic = () => { if(musicPlaying){DOM.backgroundMusic.pause();DOM.musicControlEl.textContent='🎵 تشغيل الموسيقى';}else{DOM.backgroundMusic.play().then(()=>DOM.musicControlEl.textContent='🎵 إيقاف الموسيقى').catch(()=>DOM.musicControlEl.textContent='🎵 خطأ');} musicPlaying=!musicPlaying; };
-            };
-            simplifiedFunctions();
-
+            
             loadProgress();
         });
     </script>
