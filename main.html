@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>HeartBloom for Mona 💖</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* Removes blue tap highlight on mobile */
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0b0b1a 0%, #1a1a2e 100%);
+            color: white;
+            touch-action: manipulation;
+        }
+
+        /* --- Start Screen --- */
+        #start-screen {
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 11, 26, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            transition: opacity 0.8s ease-out;
+        }
+        #start-button {
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255, 20, 147, 0.6);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        #start-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 20, 147, 0.8);
+        }
+
+        /* --- Main Container --- */
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #ffb3c6;
+            text-shadow: 0 0 20px rgba(255, 179, 198, 0.5);
+        }
+
+        .subtitle {
+            font-size: 28px;
+            font-style: italic;
+            color: #ffd4e5;
+            opacity: 0.8;
+        }
+
+        .caption {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+
+        .message {
+            font-size: 20px;
+            color: #ffe066;
+            text-align: center;
+            min-height: 30px;
+            text-shadow: 0 0 10px rgba(255, 224, 102, 0.5);
+            transition: opacity 0.5s ease-in-out;
+            position: absolute;
+            top: 30%;
+            width: 90%;
+            z-index: 10;
+        }
+
+        .heart-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #heart {
+            width: 200px;
+            height: auto;
+            cursor: pointer;
+            filter: drop-shadow(0 0 30px rgba(255, 105, 180, 0.8));
+            animation: pulse 1.6s ease-in-out infinite;
+            transition: transform 0.2s;
+            user-select: none;
+        }
+
+        #heart:active {
+            transform: scale(0.9);
+            transition: transform 0.1s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 30px rgba(255, 105, 180, 0.8)); }
+            50% { transform: scale(0.95); filter: drop-shadow(0 0 50px rgba(255, 105, 180, 1)); }
+        }
+        
+        .flower-section {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 250px;
+        }
+
+        .flower-container {
+            position: relative;
+            width: 150px;
+            height: 250px;
+        }
+
+        #pot {
+            width: 120px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        #flower {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            transform-origin: bottom center;
+            transition: all 0.5s ease;
+        }
+
+        .flying-heart {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            pointer-events: none;
+            z-index: 1000;
+            animation: flyUp 1.8s ease-out forwards;
+        }
+
+        @keyframes flyUp {
+            0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(-250px) scale(0.5) rotate(720deg); }
+        }
+
+        .bloom-message {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ff4d94;
+            text-shadow: 0 0 20px rgba(255, 77, 148, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1000;
+            line-height: 1.8;
+            white-space: pre-line;
+            transition: opacity 2s ease;
+        }
+
+        .bloom-message.show {
+            opacity: 1;
+        }
+
+        .ui-element {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: white;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            user-select: none;
+            z-index: 100;
+        }
+
+        #tapCounter { top: 10px; left: 10px; }
+        #musicControl { top: 10px; right: 10px; cursor: pointer; }
+
+        @media (max-width: 400px) {
+            .title { font-size: 36px; }
+            .subtitle { font-size: 22px; }
+            .message { font-size: 18px; top: 25%; }
+            #heart { width: 150px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1 class="title" style="font-size: 4rem; margin-bottom: 20px;">💖 HeartBloom 💖</h1>
+        <p class="subtitle" style="margin-bottom: 40px;">تطبيق صُنع بحب لـِ "مُنى"</p>
+        <button id="start-button">اضغطي هنا لتبدأي</button>
+        <p class="caption" style="margin-top: 30px;">(يرجى التأكد من رفع صوت الجهاز 🎵)</p>
+    </div>
+
+    <div class="tap-counter ui-element" id="tapCounter">نقرات: 0 | مرحلة: 0/5</div>
+    <div class="music-control ui-element" id="musicControl">🎵 تشغيل الموسيقى</div>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="title">إيمان</h1>
+            <h2 class="subtitle">مونه</h2>
+            <p class="caption">بعملك شكل بنتي 💕</p>
+        </header>
+
+        <p class="message" id="message">You make my heart glow 💫</p>
+
+        <div class="heart-container">
+            <svg id="heart" viewBox="0 0 32 29.6">
+                <defs>
+                    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ff69b4;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#ff1493;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <path fill="url(#heartGradient)" d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
+            </svg>
+        </div>
+
+        <div class="flower-section">
+            <div class="flower-container">
+                <svg id="pot" viewBox="0 0 100 80">
+                     <defs>
+                        <linearGradient id="potGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#a0522d" />
+                            <stop offset="100%" style="stop-color:#8b4513" />
+                        </linearGradient>
+                     </defs>
+                    <path d="M10 80 H90 L80 10 H20 L10 80 Z" fill="url(#potGradient)"/>
+                    <path d="M5 12 H95 V20 H5 V12 Z" fill="#654321"/>
+                </svg>
+                <svg id="flower" viewBox="0 0 100 100">
+                    <g id="stage0"><circle cx="50" cy="85" r="8" fill="#A0522D"/></g>
+                    <g id="stage1" style="opacity:0"><path d="M50 90 C 50 70, 40 70, 40 50 S 50 30, 50 10" stroke="#228B22" stroke-width="3" fill="none"/></g>
+                    <g id="stage2" style="opacity:0"><path d="M50 90 V 30" stroke="#228B22" stroke-width="4" fill="none"/><path d="M50 70 C 70 60, 75 50, 85 45" stroke="#32CD32" stroke-width="3" fill="none"/><path d="M50 60 C 30 55, 25 45, 15 40" stroke="#32CD32" stroke-width="3" fill="none"/></g>
+                    <g id="stage3" style="opacity:0"><use href="#stage2" /><circle cx="50" cy="25" r="10" fill="#FFC0CB"/></g>
+                    <g id="stage4" style="opacity:0"><use href="#stage2" /><path d="M50,25 m -15,0 a 15,15 0 1,0 30,0 a 15,15 0 1,0 -30,0" fill="#FF69B4" /><circle cx="50" cy="25" r="7" fill="yellow"/></g>
+                    <g id="stage5" style="opacity:0"><use href="#stage2" /><path transform="translate(50 25) scale(1.2)" d="M0,-15 A15 15 0 0 1 0,15 A15 15 0 0 1 0,-15 M-15,0 A15 15 0 0 1 15,0 A15 15 0 0 1 -15,0" fill="#FF1493"/><circle cx="50" cy="25" r="8" fill="#FFFF00"/></g>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="bloom-message" id="bloomMessage">
+        You made my life bloom 🌸
+        إيمان 💖
+        كل نبضة كانت ليكِ يا مونه 🌷
+        حلم حياتي ♥
+    </div>
+
+    <audio id="backgroundMusic" loop src="helm_hayaty.mp3"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- State Variables ---
+            let tapCount = 0;
+            let flowerStage = 0;
+            let currentMessageIndex = 0;
+            let isBloomed = false;
+            let musicPlaying = false;
+
+            const MESSAGES = [
+                'You make my heart glow 💫', 'Every beat is for you ❤', 'بتخلي قلبي ينور ✨',
+                'You are my dream 🌟', 'حلم حياتي يا مونه 💕', 'My world is better with you in it 💖',
+                'أنتِ أجمل حاجة في حياتي 🥰', 'Thinking of you always ✨', 'وجودك جنبي هو كل حاجة'
+            ];
+
+            // --- DOM Elements ---
+            const startScreen = document.getElementById('start-screen');
+            const startButton = document.getElementById('start-button');
+            const heart = document.getElementById('heart');
+            const flower = document.getElementById('flower');
+            const messageEl = document.getElementById('message');
+            const bloomMessageEl = document.getElementById('bloomMessage');
+            const tapCounterEl = document.getElementById('tapCounter');
+            const musicControlEl = document.getElementById('musicControl');
+            const backgroundMusic = document.getElementById('backgroundMusic');
+            const flowerStageElements = [
+                document.getElementById('stage0'), document.getElementById('stage1'),
+                document.getElementById('stage2'), document.getElementById('stage3'),
+                document.getElementById('stage4'), document.getElementById('stage5')
+            ];
+            
+            // --- Functions ---
+            const loadProgress = () => {
+                const savedTaps = localStorage.getItem('heartbloom_taps');
+                if (savedTaps) {
+                    tapCount = parseInt(savedTaps, 10);
+                    const stagesToGrow = Math.min(Math.floor(tapCount / 3), 5);
+                    flowerStage = stagesToGrow;
+                    updateFlowerStage(true); // silent update
+                    updateCounter();
+                }
+            };
+
+            const saveProgress = () => localStorage.setItem('heartbloom_taps', tapCount.toString());
+
+            const updateFlowerStage = (isSilent = false) => {
+                flowerStageElements.forEach((el, index) => {
+                    el.style.opacity = (index === flowerStage) ? '1' : '0';
+                });
+                const size = 40 + flowerStage * 20;
+                flower.style.width = size + 'px';
+                flower.style.height = size + 'px';
+            };
+            
+            const updateCounter = () => {
+                tapCounterEl.textContent = `نقرات: ${tapCount} | مرحلة: ${flowerStage}/5`;
+            };
+
+            const rotateMessage = () => {
+                messageEl.style.opacity = '0';
+                setTimeout(() => {
+                    currentMessageIndex = (currentMessageIndex + 1) % MESSAGES.length;
+                    messageEl.textContent = MESSAGES[currentMessageIndex];
+                    messageEl.style.opacity = '1';
+                }, 500);
+            };
+
+            const createFlyingHearts = (e) => {
+                const x = e.clientX || e.touches[0].clientX;
+                const y = e.clientY || e.touches[0].clientY;
+                for (let i = 0; i < 5; i++) {
+                    const flyingHeart = document.createElement('div');
+                    flyingHeart.className = 'flying-heart';
+                    flyingHeart.innerHTML = heart.outerHTML;
+                    const offsetX = (Math.random() - 0.5) * 60;
+                    flyingHeart.style.left = (x - 15) + 'px';
+                    flyingHeart.style.top = (y - 15) + 'px';
+                    flyingHeart.style.animationDelay = `${i * 0.05}s`;
+                    document.body.appendChild(flyingHeart);
+                    flyingHeart.animate([
+                        { transform: `translate(${offsetX}px, 0) scale(1)`, opacity: 1 },
+                        { transform: `translate(${offsetX}px, -250px) scale(0)`, opacity: 0 }
+                    ], { duration: 1800, easing: 'ease-out' });
+                    setTimeout(() => flyingHeart.remove(), 1800);
+                }
+            };
+            
+            const showBloomMessage = () => {
+                isBloomed = true;
+                bloomMessageEl.classList.add('show');
+                if (musicPlaying) {
+                    setTimeout(() => {
+                        let vol = backgroundMusic.volume;
+                        const fadeOut = setInterval(() => {
+                            vol -= 0.05;
+                            if (vol > 0) backgroundMusic.volume = vol;
+                            else {
+                                backgroundMusic.pause();
+                                clearInterval(fadeOut);
+                            }
+                        }, 200);
+                    }, 8000);
+                }
+            };
+
+            const onHeartTap = (e) => {
+                if(isBloomed) return;
+                tapCount++;
+                saveProgress();
+                updateCounter();
+                createFlyingHearts(e);
+
+                if (tapCount % 3 === 0 && flowerStage < 5) {
+                    flowerStage++;
+                    updateFlowerStage();
+                    if (flowerStage === 5) setTimeout(showBloomMessage, 500);
+                }
+            };
+
+            const toggleMusic = () => {
+                if (musicPlaying) {
+                    backgroundMusic.pause();
+                    musicControlEl.textContent = '🎵 تشغيل الموسيقى';
+                } else {
+                    backgroundMusic.play().then(() => {
+                        musicControlEl.textContent = '🎵 إيقاف الموسيقى';
+                    }).catch(err => {
+                        musicControlEl.textContent = '🎵 خطأ';
+                    });
+                }
+                musicPlaying = !musicPlaying;
+            };
+            
+            // --- Event Listeners & Init ---
+            startButton.addEventListener('click', () => {
+                startScreen.style.opacity = '0';
+                setTimeout(() => startScreen.style.display = 'none', 800);
+                toggleMusic();
+            });
+
+            musicControlEl.addEventListener('click', toggleMusic);
+            heart.addEventListener('click', onHeartTap);
+            heart.addEventListener('touchstart', onHeartTap, { passive: true });
+
+            loadProgress();
+            setInterval(rotateMessage, 3500);
+        });
+    </script>
+</body>
+</html>
+
