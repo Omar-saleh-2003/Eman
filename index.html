@@ -71,7 +71,7 @@
         }
         
         /* --- UI Elements --- */
-        .gemini-button, #start-button {
+        #start-button {
             background: linear-gradient(45deg, var(--heart-color-1), var(--heart-color-2));
             color: white;
             font-size: 20px;
@@ -84,19 +84,9 @@
             box-shadow: 0 0 20px rgba(255, 20, 147, 0.6);
             transition: transform 0.3s, box-shadow 0.3s;
         }
-        .gemini-button:hover, #start-button:hover {
+        #start-button:hover {
             transform: scale(1.1);
             box-shadow: 0 0 30px rgba(255, 20, 147, 0.8);
-        }
-        .gemini-button {
-            margin-top: 10px;
-            font-size: 16px;
-            padding: 12px 25px;
-            display: none; /* Hidden by default */
-        }
-        .gemini-button.show {
-            display: inline-block;
-            animation: fadeIn 1s ease-out;
         }
 
         .header { text-align: center; z-index: 10; flex-shrink: 0; }
@@ -134,12 +124,11 @@
             color: var(--message-color);
             text-align: center;
             text-shadow: 0 0 10px rgba(255, 224, 102, 0.5);
-            transition: opacity 0.5s, transform 0.5s;
+            transition: opacity 0.3s, transform 0.3s;
             opacity: 0;
             transform: translateY(20px);
         }
         .message.show { opacity: 1; transform: translateY(0); }
-        .message.loading { font-style: italic; opacity: 0.7; }
 
         .heart-container { margin-top: 20px; cursor: pointer; }
 
@@ -190,19 +179,12 @@
         
         @keyframes grow { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes pot-tap { 50% { transform: translateX(-50%) scale(0.97); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .flying-heart { position: absolute; width: 30px; height: 30px; pointer-events: none; z-index: 1000; }
 
-        .bloom-message, #poem-modal { background: rgba(0,0,0,0.8); text-align: center; font-size: 24px; font-weight: 700; color: #ff4d94; text-shadow: 0 0 20px rgba(255, 77, 148, 0.8); opacity: 0; pointer-events: none; z-index: 1000; line-height: 1.8; white-space: pre-line; transition: opacity 2s ease; }
+        .bloom-message { background: rgba(0,0,0,0.8); text-align: center; font-size: 24px; font-weight: 700; color: #ff4d94; text-shadow: 0 0 20px rgba(255, 77, 148, 0.8); opacity: 0; pointer-events: none; z-index: 1000; line-height: 1.8; white-space: pre-line; transition: opacity 2s ease; }
         .bloom-message.show { opacity: 1; }
         
-        #poem-modal { z-index: 1500; transition: opacity 0.5s ease; }
-        #poem-modal.show { opacity: 1; pointer-events: auto; }
-        .modal-content { max-width: 500px; padding: 40px; position: relative; }
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; color: white; }
-        #poem-text { font-size: clamp(18px, 4vw, 22px); }
-
         .ui-element { position: fixed; background: rgba(255, 255, 255, 0.1); padding: 8px 15px; border-radius: 20px; color: white; font-size: 14px; backdrop-filter: blur(10px); user-select: none; z-index: 100; }
         #tapCounter { top: 10px; left: 10px; }
         #musicControl { top: 10px; right: 10px; cursor: pointer; }
@@ -215,9 +197,9 @@
         <div style="max-width: 400px; line-height: 1.8;">
             <p class="subtitle" style="margin-bottom: 20px;">أهلاً بكِ في عالمي الصغير الذي صنعته خصيصاً لكِ.</p>
             <p class="caption" style="font-size: 18px; margin-bottom: 30px;">
-                الآن، أصبح القلب شاعراً... كل نقرة عليه ستلهم الذكاء الاصطناعي ليكتب لكِ رسالة حب فريدة.
+                كل نقرة على القلب ستكشف لكِ عن رسالة حب من مجموعة أعددتها لكِ خصيصاً.
                 <br>
-                وعندما تكتمل زهرتنا، سيُكتب لكِ قصيدة خاصة.
+                قومي برعاية بذرة حبنا لتنمو وتزدهر.
             </p>
         </div>
         <button id="start-button">ابدئي الرحلة</button>
@@ -232,7 +214,7 @@
 
         <div class="interaction-area">
             <div class="message-container">
-                <p class="message" id="message">اضغطي على القلب لتلهمي الشاعر 💖</p>
+                <p class="message" id="message">اضغطي على القلب لرؤية رسالة حب 💖</p>
             </div>
             <div class="heart-container" id="heart-touch-area">
                 <svg id="heart" viewBox="0 0 32 29.6">
@@ -257,7 +239,6 @@
                     <g class="flower-stage" id="stage5" style="opacity:0"><use href="#stage2" /><path transform="translate(50 25) scale(1.2)" d="M0,-15 A15 15 0 0 1 0,15 A15 15 0 0 1 0,-15 M-15,0 A15 15 0 0 1 15,0 A15 15 0 0 1 -15,0" fill="#FF1493"/><circle cx="50" cy="25" r="8" fill="#FFFF00"/></g>
                 </svg>
             </div>
-            <button id="poem-button" class="gemini-button">✨ اطلب قصيدة خاصة</button>
         </div>
     </div>
 
@@ -268,27 +249,34 @@
         حلم حياتي ♥
     </div>
 
-    <div id="poem-modal" class="screen">
-        <div class="modal-content">
-            <span class="close-modal" id="close-poem-modal">&times;</span>
-            <p id="poem-text">جاري كتابة قصيدة تليق بكِ...</p>
-        </div>
-    </div>
-
     <div class="tap-counter ui-element" id="tapCounter">نمو الزهرة: 0/15</div>
     <div class="music-control ui-element" id="musicControl">🎵 تشغيل الموسيقى</div>
     
-    <!-- IMPORTANT: Place your 'helm_hayaty.mp3' file in the same folder as this HTML file. -->
     <audio id="backgroundMusic" loop src="helm_hayaty.mp3"></audio>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            let potTapCount = 0, flowerStage = 0, isBloomed = false, musicPlaying = false, isGenerating = false;
-            let typewriterInterval;
-            
-            // --- Gemini API Configuration ---
-            const API_KEY = ""; // Leave empty, it will be handled by the environment
-            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+            let potTapCount = 0, flowerStage = 0, isBloomed = false, musicPlaying = false;
+            let currentMessageIndex = 0;
+
+            const MESSAGES = [
+                'وجودك في حياتي هو أجمل هدية.', 'كل يوم معكِ هو عيد بالنسبة لي.', 'أنتِ النور الذي يضيء أيامي المظلمة.',
+                'ابتسامتكِ تذيب قلبي.', 'أحبكِ أكثر من الكلمات يمكن أن تصف.', 'أنتِ حلمي الذي تحقق.',
+                'معكِ، كل شيء يبدو ممكنًا.', 'قلبي ينبض باسمكِ.', 'أنتِ الأغنية التي لا تمل روحي من سماعها.',
+                'أنتِ لستِ فقط في قلبي، أنتِ قلبي.', 'كل لحظة معكِ لا تُنسى.', 'لا يمكنني تخيل حياتي بدونكِ.',
+                'حبكِ هو وقودي.', 'أنتِ نجمتي الساطعة في سماء حياتي.', 'أشعر وكأنني ملك العالم عندما أكون معكِ.',
+                'أنتِ تكمليني.', 'أنتِ سبب سعادتي.', 'أنتِ السلام في عالمي الفوضوي.',
+                'أنتِ أجمل قصيدة قرأتها.', 'أحب الطريقة التي تجعليني بها أشعر.', 'كل تفاصيلكِ الصغيرة هي سبب حبي الكبير.',
+                'أنتِ الهواء الذي أتنفسه.', 'في عينيكِ أرى مستقبلي.', 'معكِ، أشعر وكأنني في بيتي.',
+                'أنتِ إدماني الذي لا أريد الشفاء منه.', 'أنتِ السحر في حياتي.', 'أريد أن أقضي بقية حياتي معكِ.',
+                'ضحكتكِ هي الموسيقى المفضلة لدي.', 'أحبكِ حتى القمر والعودة.', 'أنتِ كل ما أحتاجه.',
+                'عالمي أجمل بوجودكِ فيه.', 'أنتِ لحني المفضل.', 'لا شيء يضاهي الشعور بوجودكِ بجانبي.',
+                'أنتِ شمسي في يوم غائم.', 'أنتِ الفكرة الأولى والأخيرة في ذهني كل يوم.', 'أنتِ الأمان الذي أبحث عنه.',
+                'أنتِ أجمل صدفة في حياتي.', 'كل الطرق تؤدي إليكِ.', 'أنتِ المعنى لكل شيء جميل.',
+                'لا أريد شيئاً أكثر من أن أكون معكِ.', 'أنتِ تجعلينني أريد أن أكون رجلاً أفضل.', 'أنتِ قصتي المفضلة.',
+                'وجودكِ يجعل كل شيء على ما يرام.', 'أنتِ معجزتي الصغيرة.', 'أنتِ الهدوء وسط العاصفة.',
+                'أحبكِ بكل ما فيكِ من تفاصيل.', 'أنتِ تعريف الجمال بالنسبة لي.', 'أنتِ وطني وملاذي.'
+            ];
 
             const DOM = {
                 startScreen: document.getElementById('start-screen'),
@@ -301,58 +289,10 @@
                 musicControlEl: document.getElementById('musicControl'),
                 backgroundMusic: document.getElementById('backgroundMusic'),
                 pot: document.getElementById('pot'),
-                poemButton: document.getElementById('poem-button'),
-                poemModal: document.getElementById('poem-modal'),
-                poemText: document.getElementById('poem-text'),
-                closePoemModal: document.getElementById('close-poem-modal'),
                 flowerStages: Array.from({length: 6}, (_, i) => document.getElementById(`stage${i}`)),
             };
 
-            // --- Typewriter Effect ---
-            function typewriter(element, text) {
-                clearInterval(typewriterInterval);
-                const words = text.split(' ');
-                let i = 0;
-                element.textContent = '';
-                element.classList.remove('loading');
-                element.classList.add('show');
-
-                typewriterInterval = setInterval(() => {
-                    if (i < words.length) {
-                        element.textContent += words[i] + ' ';
-                        i++;
-                    } else {
-                        clearInterval(typewriterInterval);
-                    }
-                }, 120); // Typing speed
-            }
-
-            // --- Gemini API Call Function ---
-            async function generateGeminiContent(prompt, retries = 3, delay = 1000) {
-                isGenerating = true;
-                try {
-                    const payload = { contents: [{ parts: [{ text: prompt }] }] };
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    const result = await response.json();
-                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (!text) throw new Error("No content generated.");
-                    return text.trim();
-                } catch (error) {
-                    if (retries > 0) {
-                        await new Promise(res => setTimeout(res, delay));
-                        return generateGeminiContent(prompt, retries - 1, delay * 2);
-                    }
-                    console.error("Gemini API Error:", error);
-                    return "يبدو أن الشاعر يحتاج للحظة من الإلهام... حاولي مجدداً.";
-                } finally {
-                    isGenerating = false;
-                }
-            }
+            const shuffleArray = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } };
 
             const updateFlowerStage = (isSilent = false) => {
                 const newStage = Math.min(Math.floor(potTapCount / 3), 5);
@@ -369,24 +309,20 @@
                 }
             };
 
-            const showGeneratedMessage = async () => {
-                if (isGenerating) return;
-                clearInterval(typewriterInterval);
+            const showNextMessage = () => {
                 DOM.messageEl.classList.remove('show');
-                DOM.messageEl.classList.add('loading');
-                DOM.messageEl.textContent = 'الشاعر يجمع كلماته...';
-                
-                const prompt = "اكتب رسالة حب قصيرة جداً ورومانسية من سطر واحد فقط، باللغة العربية بأسلوب شاعري.";
-                const message = await generateGeminiContent(prompt);
-                
-                typewriter(DOM.messageEl, message);
+                setTimeout(() => {
+                    DOM.messageEl.textContent = MESSAGES[currentMessageIndex];
+                    DOM.messageEl.classList.add('show');
+                    currentMessageIndex = (currentMessageIndex + 1) % MESSAGES.length;
+                }, 300);
             };
             
             const loadProgress = () => { const s=localStorage.getItem('heartbloom_pot_taps'); if(s){potTapCount=parseInt(s,10);flowerStage=Math.min(Math.floor(potTapCount/3),5);updateFlowerStage(true);updateCounter();} };
             const saveProgress = () => localStorage.setItem('heartbloom_pot_taps', potTapCount.toString());
             const updateCounter = () => DOM.tapCounterEl.textContent = `نمو الزهرة: ${potTapCount}/15`;
             const createFlyingHearts = () => { const r=DOM.heartTouchArea.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2; for(let i=0;i<5;i++){const h=document.createElement('div');h.className='flying-heart';h.innerHTML=DOM.heartTouchArea.querySelector('svg').outerHTML;h.style.left=`${x-15}px`;h.style.top=`${y-15}px`;document.body.appendChild(h);const a=h.animate([{transform:`translate(0,0) scale(1) rotate(0deg)`,opacity:1},{transform:`translate(${(Math.random()-.5)*100}px,-${150+Math.random()*100}px) scale(0) rotate(${(Math.random()-.5)*360}deg)`,opacity:0}],{duration:1800,easing:'cubic-bezier(.1,.9,.2,1)',delay:i*50});a.onfinish=()=>h.remove();} };
-            const showBloomMessage = () => { isBloomed=true; DOM.bloomMessageEl.classList.add('show'); DOM.poemButton.classList.add('show'); if(musicPlaying){setTimeout(()=>{let v=DOM.backgroundMusic.volume;const f=setInterval(()=>{v=Math.max(0,v-.05);DOM.backgroundMusic.volume=v;if(v===0){DOM.backgroundMusic.pause();clearInterval(f);}},200);},8000);} };
+            const showBloomMessage = () => { isBloomed=true; DOM.bloomMessageEl.classList.add('show'); if(musicPlaying){setTimeout(()=>{let v=DOM.backgroundMusic.volume;const f=setInterval(()=>{v=Math.max(0,v-.05);DOM.backgroundMusic.volume=v;if(v===0){DOM.backgroundMusic.pause();clearInterval(f);}},200);},8000);} };
             
             const toggleMusic = () => {
                 if (musicPlaying) {
@@ -415,7 +351,7 @@
             });
 
             DOM.musicControlEl.addEventListener('click', toggleMusic);
-            DOM.heartTouchArea.addEventListener('click', () => { showGeneratedMessage(); createFlyingHearts(); });
+            DOM.heartTouchArea.addEventListener('click', () => { showNextMessage(); createFlyingHearts(); });
             DOM.flowerTouchArea.addEventListener('click', () => {
                 if (isBloomed) return;
                 DOM.pot.style.animation = 'pot-tap 0.3s ease-in-out';
@@ -426,22 +362,8 @@
                 updateFlowerStage();
                 if (potTapCount >= 15 && !isBloomed) setTimeout(showBloomMessage, 500);
             });
-
-            DOM.poemButton.addEventListener('click', async () => {
-                if (isGenerating) return;
-                clearInterval(typewriterInterval);
-                DOM.poemModal.classList.add('show');
-                DOM.poemText.textContent = 'الشاعر ينسج قصيدة تليق بكِ...';
-                const prompt = "اكتب قصيدة حب قصيرة وجميلة لإيمان، الملقبة بمونه. اجعلها عن كيف أن حبها جعل الحياة تزدهر مثل الزهرة.";
-                const poem = await generateGeminiContent(prompt);
-                typewriter(DOM.poemText, poem);
-            });
-
-            DOM.closePoemModal.addEventListener('click', () => {
-                DOM.poemModal.classList.remove('show');
-                clearInterval(typewriterInterval);
-            });
             
+            shuffleArray(MESSAGES);
             loadProgress();
         });
     </script>
