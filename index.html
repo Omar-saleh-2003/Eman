@@ -177,7 +177,20 @@
         #flower { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); transform-origin: bottom center; transition: all 0.5s ease; }
         .flower-stage { transition: opacity 0.5s; transform-origin: 50% 90%; }
         
-        @keyframes grow { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes flowerBloom {
+            0% {
+                transform: scale(0.3) rotate(-20deg);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.1) rotate(10deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
         @keyframes pot-tap { 50% { transform: translateX(-50%) scale(0.97); } }
 
         .flying-heart { position: absolute; width: 30px; height: 30px; pointer-events: none; z-index: 1000; }
@@ -236,7 +249,21 @@
                     <g class="flower-stage" id="stage2" style="opacity:0"><path d="M50 90 V 30" stroke="#228B22" stroke-width="4" fill="none"/><path d="M50 70 C 70 60, 75 50, 85 45" stroke="#32CD32" stroke-width="3" fill="none"/><path d="M50 60 C 30 55, 25 45, 15 40" stroke="#32CD32" stroke-width="3" fill="none"/></g>
                     <g class="flower-stage" id="stage3" style="opacity:0"><use href="#stage2" /><circle cx="50" cy="25" r="10" fill="#FFC0CB"/></g>
                     <g class="flower-stage" id="stage4" style="opacity:0"><use href="#stage2" /><path d="M50,25 m -15,0 a 15,15 0 1,0 30,0 a 15,15 0 1,0 -30,0" fill="#FF69B4" /><circle cx="50" cy="25" r="7" fill="yellow"/></g>
-                    <g class="flower-stage" id="stage5" style="opacity:0"><use href="#stage2" /><path transform="translate(50 25) scale(1.2)" d="M0,-15 A15 15 0 0 1 0,15 A15 15 0 0 1 0,-15 M-15,0 A15 15 0 0 1 15,0 A15 15 0 0 1 -15,0" fill="#FF1493"/><circle cx="50" cy="25" r="8" fill="#FFFF00"/></g>
+                    <g class="flower-stage" id="stage5" style="opacity:0">
+                        <g>
+                            <use href="#stage2" />
+                            <path transform="translate(50 25) scale(1.2)" d="M0,-15 A15 15 0 0 1 0,15 A15 15 0 0 1 0,-15 M-15,0 A15 15 0 0 1 15,0 A15 15 0 0 1 -15,0" fill="#FF1493"/>
+                            <circle cx="50" cy="25" r="8" fill="#FFFF00"/>
+                            <animateTransform 
+                                attributeName="transform"
+                                type="rotate"
+                                values="0 50 95; -1.5 50 95; 1.5 50 95; 0 50 95"
+                                keyTimes="0; 0.25; 0.75; 1"
+                                dur="5s"
+                                repeatCount="indefinite"
+                            />
+                        </g>
+                    </g>
                 </svg>
             </div>
         </div>
@@ -302,7 +329,7 @@
                         const isCurrentStage = index === flowerStage;
                         el.style.opacity = isCurrentStage ? '1' : '0';
                         if (isCurrentStage && !isSilent) {
-                           el.style.animation = 'grow 0.6s ease-out';
+                           el.style.animation = 'flowerBloom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                            el.addEventListener('animationend', () => el.style.animation = '', { once: true });
                         }
                     });
