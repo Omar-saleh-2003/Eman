@@ -364,55 +364,16 @@
             };
 
             const shuffleArray = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } };
-
-            const updateFlowerStage = (isSilent = false) => {
-                const newStage = Math.min(Math.floor(potTapCount / 3), 5);
-                if (newStage !== flowerStage || isSilent) {
-                    flowerStage = newStage;
-                    DOM.flowerStages.forEach((el, index) => {
-                        const isCurrentStage = index === flowerStage;
-                        el.style.opacity = isCurrentStage ? '1' : '0';
-                        if (isCurrentStage && !isSilent) {
-                           el.style.animation = 'flowerBloom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                           el.addEventListener('animationend', () => el.style.animation = '', { once: true });
-                        }
-                    });
-                }
-            };
-
-            const showNextMessage = () => {
-                DOM.messageEl.classList.remove('show');
-                setTimeout(() => {
-                    DOM.messageEl.textContent = MESSAGES[currentMessageIndex];
-                    DOM.messageEl.classList.add('show');
-                    currentMessageIndex = (currentMessageIndex + 1) % MESSAGES.length;
-                }, 300);
-            };
-            
+            const updateFlowerStage = (isSilent = false) => { const newStage = Math.min(Math.floor(potTapCount / 3), 5); if (newStage !== flowerStage || isSilent) { flowerStage = newStage; DOM.flowerStages.forEach((el, index) => { const isCurrentStage = index === flowerStage; el.style.opacity = isCurrentStage ? '1' : '0'; if (isCurrentStage && !isSilent) { el.style.animation = 'flowerBloom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)'; el.addEventListener('animationend', () => el.style.animation = '', { once: true }); } }); } };
+            const showNextMessage = () => { DOM.messageEl.classList.remove('show'); setTimeout(() => { DOM.messageEl.textContent = MESSAGES[currentMessageIndex]; DOM.messageEl.classList.add('show'); currentMessageIndex = (currentMessageIndex + 1) % MESSAGES.length; }, 300); };
             const loadProgress = () => { const s=localStorage.getItem('heartbloom_pot_taps'); if(s){potTapCount=parseInt(s,10);flowerStage=Math.min(Math.floor(potTapCount/3),5);updateFlowerStage(true);updateCounter();} };
             const saveProgress = () => localStorage.setItem('heartbloom_pot_taps', potTapCount.toString());
             const updateCounter = () => DOM.tapCounterEl.textContent = `نمو الزهرة: ${potTapCount}/15`;
             const createFlyingHearts = () => { const r=DOM.heartTouchArea.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2; for(let i=0;i<5;i++){const h=document.createElement('div');h.className='flying-heart';h.innerHTML=DOM.heartTouchArea.querySelector('svg').outerHTML;h.style.left=`${x-15}px`;h.style.top=`${y-15}px`;document.body.appendChild(h);const a=h.animate([{transform:`translate(0,0) scale(1) rotate(0deg)`,opacity:1},{transform:`translate(${(Math.random()-.5)*100}px,-${150+Math.random()*100}px) scale(0) rotate(${(Math.random()-.5)*360}deg)`,opacity:0}],{duration:1800,easing:'cubic-bezier(.1,.9,.2,1)',delay:i*50});a.onfinish=()=>h.remove();} };
             const showBloomMessage = () => { isBloomed=true; DOM.bloomMessageEl.classList.add('show'); if(musicPlaying){setTimeout(()=>{let v=DOM.backgroundMusic.volume;const f=setInterval(()=>{v=Math.max(0,v-.05);DOM.backgroundMusic.volume=v;if(v===0){DOM.backgroundMusic.pause();clearInterval(f);}},200);},8000);} };
-            
-            const toggleMusic = () => {
-                if (musicPlaying) {
-                    DOM.backgroundMusic.pause();
-                    DOM.musicControlEl.textContent = '🎵 تشغيل الموسيقى';
-                } else {
-                    const playPromise = DOM.backgroundMusic.play();
-                    if (playPromise !== undefined) {
-                        playPromise.then(() => {
-                            DOM.musicControlEl.textContent = '🎵 إيقاف الموسيقى';
-                        }).catch(error => {
-                            console.error("Music playback failed:", error);
-                            DOM.musicControlEl.textContent = '🎵 الموسيقى معطلة';
-                        });
-                    }
-                }
-                musicPlaying = !musicPlaying;
-            };
+            const toggleMusic = () => { if (musicPlaying) { DOM.backgroundMusic.pause(); DOM.musicControlEl.textContent = '🎵 تشغيل الموسيقى'; } else { const playPromise = DOM.backgroundMusic.play(); if (playPromise !== undefined) { playPromise.then(() => { DOM.musicControlEl.textContent = '🎵 إيقاف الموسيقى'; }).catch(error => { console.error("Music playback failed:", error); DOM.musicControlEl.textContent = '🎵 الموسيقى معطلة'; }); } } musicPlaying = !musicPlaying; };
 
+            // --- ### الكود المعدل هنا ### ---
             const sendMessage = () => {
                 const message = DOM.userMessage.value.trim();
                 if (message === '') {
@@ -421,14 +382,21 @@
                 }
                 DOM.sendMessageButton.disabled = true;
                 DOM.sendMessageButton.textContent = 'جار الإرسال...';
-                fetch('save_message.php', {
+                
+                fetch('https://formsubmit.co/ajax/osalh9959@gmail.com', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: 'message=' + encodeURIComponent(message)
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        _subject: "رسالة جديدة من مونه 💌",
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.status === 'success') {
+                    if (data.success) {
                         DOM.userMessage.value = '';
                         DOM.successMessage.style.opacity = '1';
                         setTimeout(() => {
@@ -447,28 +415,14 @@
                     DOM.sendMessageButton.textContent = 'إرسال';
                 });
             };
+            // --- ### نهاية الكود المعدل ### ---
 
             // --- Event Listeners & Init ---
-            DOM.startButton.addEventListener('click', () => {
-                DOM.startScreen.style.opacity = '0';
-                setTimeout(() => DOM.startScreen.style.display = 'none', 800);
-                toggleMusic();
-                DOM.messageEl.classList.add('show');
-            });
-
+            DOM.startButton.addEventListener('click', () => { DOM.startScreen.style.opacity = '0'; setTimeout(() => DOM.startScreen.style.display = 'none', 800); toggleMusic(); DOM.messageEl.classList.add('show'); });
             DOM.musicControlEl.addEventListener('click', toggleMusic);
             DOM.heartTouchArea.addEventListener('click', () => { showNextMessage(); createFlyingHearts(); });
             DOM.sendMessageButton.addEventListener('click', sendMessage);
-            DOM.flowerTouchArea.addEventListener('click', () => {
-                if (isBloomed) return;
-                DOM.pot.style.animation = 'pot-tap 0.3s ease-in-out';
-                DOM.pot.addEventListener('animationend', () => DOM.pot.style.animation = '', { once: true });
-                potTapCount++;
-                saveProgress();
-                updateCounter();
-                updateFlowerStage();
-                if (potTapCount >= 15 && !isBloomed) setTimeout(showBloomMessage, 500);
-            });
+            DOM.flowerTouchArea.addEventListener('click', () => { if (isBloomed) return; DOM.pot.style.animation = 'pot-tap 0.3s ease-in-out'; DOM.pot.addEventListener('animationend', () => DOM.pot.style.animation = '', { once: true }); potTapCount++; saveProgress(); updateCounter(); updateFlowerStage(); if (potTapCount >= 15 && !isBloomed) setTimeout(showBloomMessage, 500); });
             
             shuffleArray(MESSAGES);
             loadProgress();
