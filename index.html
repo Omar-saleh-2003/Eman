@@ -68,6 +68,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 20px;
+            overflow-y: auto; /* للسماح بالتمرير إذا أصبحت المحتويات طويلة */
         }
         
         /* --- UI Elements --- */
@@ -178,18 +179,9 @@
         .flower-stage { transition: opacity 0.5s; transform-origin: 50% 90%; }
         
         @keyframes flowerBloom {
-            0% {
-                transform: scale(0.3) rotate(-20deg);
-                opacity: 0;
-            }
-            60% {
-                transform: scale(1.1) rotate(10deg);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(1) rotate(0deg);
-                opacity: 1;
-            }
+            0% { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+            60% { transform: scale(1.1) rotate(10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
         }
         @keyframes pot-tap { 50% { transform: translateX(-50%) scale(0.97); } }
 
@@ -201,6 +193,48 @@
         .ui-element { position: fixed; background: rgba(255, 255, 255, 0.1); padding: 8px 15px; border-radius: 20px; color: white; font-size: 14px; backdrop-filter: blur(10px); user-select: none; z-index: 100; }
         #tapCounter { top: 10px; left: 10px; }
         #musicControl { top: 10px; right: 10px; cursor: pointer; }
+
+        /* --- Styles for Send Message Box --- */
+        .send-message-container {
+            width: 90%;
+            max-width: 400px;
+            margin: 20px auto 0;
+            text-align: center;
+            z-index: 10;
+        }
+        #userMessage {
+            width: 100%;
+            height: 80px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--subtitle-color);
+            border-radius: 15px;
+            padding: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 16px;
+            color: white;
+            resize: none;
+            margin-bottom: 10px;
+        }
+        #userMessage:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(255, 212, 229, 0.5);
+        }
+        #sendMessageButton {
+            background: linear-gradient(45deg, var(--heart-color-1), var(--heart-color-2));
+            color: white;
+            font-size: 16px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: bold;
+            padding: 10px 25px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 20, 147, 0.5);
+            transition: transform 0.2s;
+        }
+        #sendMessageButton:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -267,7 +301,14 @@
                 </svg>
             </div>
         </div>
-    </div>
+
+        <div class="send-message-container">
+            <p class="caption" style="margin-bottom: 10px;">اتركي لي رسالة هنا يا مونه 💌</p>
+            <textarea id="userMessage" placeholder="اكتبي رسالتك..."></textarea>
+            <button id="sendMessageButton">إرسال</button>
+            <p id="successMessage" class="caption" style="opacity:0; transition: opacity 0.5s;">تم إرسال رسالتك بنجاح!</p>
+        </div>
+        </div>
 
     <div class="bloom-message screen" id="bloomMessage">
         You made my life bloom 🌸
@@ -317,6 +358,9 @@
                 backgroundMusic: document.getElementById('backgroundMusic'),
                 pot: document.getElementById('pot'),
                 flowerStages: Array.from({length: 6}, (_, i) => document.getElementById(`stage${i}`)),
+                userMessage: document.getElementById('userMessage'),
+                sendMessageButton: document.getElementById('sendMessageButton'),
+                successMessage: document.getElementById('successMessage')
             };
 
             const shuffleArray = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } };
@@ -359,7 +403,7 @@
                     const playPromise = DOM.backgroundMusic.play();
                     if (playPromise !== undefined) {
                         playPromise.then(() => {
-                           DOM.musicControlEl.textContent = '🎵 إيقاف الموسيقى';
+                            DOM.musicControlEl.textContent = '🎵 إيقاف الموسيقى';
                         }).catch(error => {
                             console.error("Music playback failed:", error);
                             DOM.musicControlEl.textContent = '🎵 الموسيقى معطلة';
@@ -367,6 +411,41 @@
                     }
                 }
                 musicPlaying = !musicPlaying;
+            };
+
+            const sendMessage = () => {
+                const message = DOM.userMessage.value.trim();
+                if (message === '') {
+                    alert('من فضلك اكتبي رسالة أولاً.');
+                    return;
+                }
+                DOM.sendMessageButton.disabled = true;
+                DOM.sendMessageButton.textContent = 'جار الإرسال...';
+                fetch('save_message.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'message=' + encodeURIComponent(message)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        DOM.userMessage.value = '';
+                        DOM.successMessage.style.opacity = '1';
+                        setTimeout(() => {
+                            DOM.successMessage.style.opacity = '0';
+                        }, 3000);
+                    } else {
+                        alert('حدث خطأ أثناء إرسال الرسالة. حاول مرة أخرى.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ فني. تحقق من الاتصال بالانترنت.');
+                })
+                .finally(() => {
+                    DOM.sendMessageButton.disabled = false;
+                    DOM.sendMessageButton.textContent = 'إرسال';
+                });
             };
 
             // --- Event Listeners & Init ---
@@ -379,6 +458,7 @@
 
             DOM.musicControlEl.addEventListener('click', toggleMusic);
             DOM.heartTouchArea.addEventListener('click', () => { showNextMessage(); createFlyingHearts(); });
+            DOM.sendMessageButton.addEventListener('click', sendMessage);
             DOM.flowerTouchArea.addEventListener('click', () => {
                 if (isBloomed) return;
                 DOM.pot.style.animation = 'pot-tap 0.3s ease-in-out';
@@ -396,4 +476,3 @@
     </script>
 </body>
 </html>
-
